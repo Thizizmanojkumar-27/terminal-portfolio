@@ -58,3 +58,26 @@ Type the following commands in the terminal:
 
 ## 📂 Project Structure
 
+---
+
+## 👨‍🎓 About Me
+
+I am **Manoj Kumar**, a Full Stack Developer passionate about building scalable web applications and clean user interfaces.
+
+- 💡 Interested in Full Stack & Backend Development
+- 🌱 Currently learning Spring Boot, SQL, DSA
+- 🎯 Placement-focused student
+- 📍 India
+
+---
+
+## 📬 Contact
+
+- 📧 Email: manojkumar.twenty7@gmail.com  
+- 📞 Phone: +91 9380127110  
+- 💼 LinkedIn: [Manoj Kumar](https://www.linkedin.com/in/manoj-kumar-087447324)  
+- 🐙 GitHub: [Thizismanojkumar-27](https://github.com/Thizismanojkumar-27)
+
+
+
+
