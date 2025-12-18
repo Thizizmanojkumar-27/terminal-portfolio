@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manoj Kumar | CLI Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom style for the glossy terminal effect and theme variables -->
+    <style>
+        :root {
+            /* Default Black Theme Variables */
+            --term-bg: radial-gradient(ellipse at 10% 10%, #151515, #0a0a0a);
+            --term-shadow: 0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(132, 204, 22, 0.2);
+            --term-text: #86efac; /* green-300 */
+            --term-heading: #a3e635; /* lime-400 */
+            --term-prompt: #a3e635; /* lime-400 */
+            --term-accent: #bef264; /* lime-300 */
+            --term-subtle: #4ade80; /* green-400 */
+            --term-header-bg: #0a0a0a;
+            --term-input-text: #ffffff;
+            --page-bg: #000000;
+        }
+
+        [data-theme='light'] {
+            /* White Glossy Theme Variables */
+            --term-bg: radial-gradient(ellipse at 10% 10%, #ffffff, #f3f4f6);
+            --term-shadow: 0 0 40px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.05);
+            --term-text: #166534; /* green-800 */
+            --term-heading: #3f6212; /* lime-800 */
+            --term-prompt: #4d7c0f; /* lime-700 */
+            --term-accent: #65a30d; /* lime-600 */
+            --term-subtle: #15803d; /* green-700 */
+            --term-header-bg: #e5e7eb;
+            --term-input-text: #000000;
+            --page-bg: #f3f4f6;
+        }
+
+        [data-theme='dracula'] {
+            /* Dracula Theme Variables */
+            --term-bg: radial-gradient(ellipse at 10% 10%, #44475a, #282a36);
+            --term-shadow: 0 0 40px rgba(255, 121, 198, 0.2), inset 0 0 10px rgba(189, 147, 249, 0.15);
+            --term-text: #f8f8f2; /* Foreground */
+            --term-heading: #ff79c6; /* Pink */
+            --term-prompt: #ff79c6; /* Pink */
+            --term-accent: #bd93f9; /* Purple */
+            --term-subtle: #8be9fd; /* Cyan */
+            --term-header-bg: #282a36;
+            --term-input-text: #f8f8f2;
+            --page-bg: #1e1f29;
+        }
+
+        body {
+            background-color: var(--page-bg);
+            transition: background-color 0.3s ease;
+        }
+
+        .terminal-style {
+            background: var(--term-bg);
+            box-shadow: var(--term-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .text-term-main { color: var(--term-text); }
+        .text-term-heading { color: var(--term-heading); }
+        .text-term-prompt { color: var(--term-prompt); }
+        .text-term-accent { color: var(--term-accent); }
+        .text-term-subtle { color: var(--term-subtle); }
+        
+        .terminal-input-field {
+            caret-color: var(--term-input-text);
+            color: var(--term-input-text);
+        }
+
+        /* Ensure ul list styles are displayed correctly */
+        .list-disc {
+            list-style-type: disc;
+        }
+    </style>
+</head>
+<body class="font-mono antialiased">
+    <div id="root"></div>
+
+    <!-- React, ReactDOM, Babel CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect, useCallback, useMemo } = React;
+        
+        // --- Inline SVG Icon Definitions ---
+        const Icon = ({ children, className }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {children}
+            </svg>
+        );
+
+        const Github = ({ className }) => (
+            <Icon className={className}>
+                <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.6c3.2-.4 6.7-1.6 6.7-7.3a5.5 5.5 0 0 0-1.5-3.7 5.2 5.2 0 0 0-2.2-1.7c-.5-.2-1.2-.3-2.1-.3a9 9 0 0 0-2.4 1.2c-.8-.5-1.7-1.2-2.7-1.2h-1c-.5 0-1.3.1-2.1.3a5.2 5.2 0 0 0-2.2 1.7 5.5 5.5 0 0 0-1.5 3.7c0 5.7 3.5 6.9 6.7 7.3a4.8 4.8 0 0 0-1 3.6v4"/>
+                <path d="M12 2v20"/>
+            </Icon>
+        );
+
+        const Linkedin = ({ className }) => (
+            <Icon className={className}>
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                <rect width="4" height="12" x="2" y="9"/>
+                <circle cx="4" cy="4" r="2"/>
+            </Icon>
+        );
+
+        const Mail = ({ className }) => (
+            <Icon className={className}>
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </Icon>
+        );
+        
+        const Copy = ({ className }) => (
+            <Icon className={className}>
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </Icon>
+        );
+
+        const Phone = ({ className }) => (
+            <Icon className={className}>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6.7-6.7A19.79 19.79 0 0 1 2 4.18 2 2 0 0 1 4.18 2h3c.43 0 .8.14 1.11.45L12 8l-1.11 1.11a.8.8 0 0 0-.25.56c0 .48.37.84.84.84h1.11L14 12l5.42 5.42a.8.8 0 0 0 .56.25c.48 0 .84-.37.84-.84V16.92z"/>
+            </Icon>
+        );
+
+        // --- Static Output Wrapper ---
+        const CommandOutput = ({ children }) => (
+          <pre className={`text-term-main whitespace-pre-wrap font-mono text-sm leading-relaxed mb-4`}>
+            {children}
+          </pre>
+        );
+
+        // --- Portfolio Content Components ---
+
+        const Welcome = () => (
+          <CommandOutput>
+            <div className={`text-term-heading mb-4 font-bold`}>
+              {`
+=====================================================
+  [Manoj Kumar: Full Stack Developer Portfolio]
+  Welcome, visitor! Type 'readme' to get started.
+=====================================================
+              `}
+            </div>
+            <p>Current User: <span className="text-blue-400">guest</span></p>
+            <p>Type '<span className="text-term-accent">readme</span>' for a list of available commands.</p>
+          </CommandOutput>
+        );
+
+        const About = () => (
+          <CommandOutput>
+            <div className={`text-xl font-bold text-term-heading mb-2`}>About Me</div>
+            <p>Hello, I'm <span className="text-term-accent font-bold">Manoj Kumar</span>, a passionate full stack developer with expertise in building robust and scalable web applications.</p>
+            <p>My journey in development has equipped me with a strong foundation in both front-end and back-end technologies, allowing me to create seamless and efficient user experiences.</p>
+            <p>I am a firm believer in clean code, continuous learning, and solving complex problems with creative solutions.</p>
+            <p className="mt-2">Location: India</p>
+            <p>Status: <span className="text-green-500 font-semibold">Available for Opportunities.</span></p>
+          </CommandOutput>
+        );
+
+        const Skills = () => (
+          <CommandOutput>
+            <div className={`text-xl font-bold text-term-heading mb-4`}>Technical Proficiencies</div>
+            <div className="overflow-x-auto border border-term-subtle/30 rounded-lg max-w-3xl bg-white/5 backdrop-blur-sm">
+              <table className="min-w-full divide-y divide-term-subtle/30">
+                <thead className="bg-white/5">
+                  <tr>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-bold text-term-accent uppercase tracking-wider border-r border-term-subtle/30">Category</th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-bold text-term-accent uppercase tracking-wider">Tech Stack</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-term-subtle/30">
+                  <tr>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm font-bold border-r border-term-subtle/30">Frontend</td>
+                    <td className="px-4 py-2 text-sm">React.js, JavaScript, HTML, CSS</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm font-bold border-r border-term-subtle/30">Backend</td>
+                    <td className="px-4 py-2 text-sm">Node.js, Java, Spring Boot</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm font-bold border-r border-term-subtle/30">Database & Logic</td>
+                    <td className="px-4 py-2 text-sm">SQL, DSA (Data Structures & Algorithms)</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm font-bold border-r border-term-subtle/30">Methodology</td>
+                    <td className="px-4 py-2 text-sm">Scalable Architectures, Clean Code, RESTful APIs</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className={`mt-4 text-sm text-term-subtle italic`}>Try running 'ls -l' for a mock file system view!</p>
+          </CommandOutput>
+        );
+
+        const Experience = () => (
+          <CommandOutput>
+            <div className={`text-xl font-bold text-term-heading mb-2`}>Professional Experience</div>
+            <div className="mb-4">
+              <span className="text-term-accent font-semibold">Saiket Systems - Web Development Intern</span>
+              <p className={`text-sm text-term-subtle`}>Duration: August 2025 to September 2025 | Location: Remote</p>
+              <ul className="list-disc list-inside ml-4 mt-1">
+                <li>Implemented dynamic user interfaces using <span className="underline">React.js</span>, focusing on component reusability and modern state management.</li>
+                <li>Contributed to the backend development using <span className="underline">Node.js</span>, including API design and RESTful service implementation.</li>
+                <li>Gained practical experience in Agile methodology and version control (Git).</li>
+              </ul>
+            </div>
+            <div className="mb-4">
+              <span className="text-term-accent font-semibold">Scontinent Technologies Pvt Ltd - Software Development Trainee</span>
+              <p className={`text-sm text-term-subtle`}>Duration: November 2025 to December 2025 | Location: Bengaluru</p>
+              <ul className="list-disc list-inside ml-4 mt-1">
+                <li>Assisted in the development of <span className="underline">Java-based backend services</span>, leveraging the Spring Boot framework.</li>
+                <li>Focused on Data Structures and Algorithms (DSA) implementation to optimize core business logic.</li>
+                <li>Learned database interaction and SQL query optimization techniques.</li>
+              </ul>
+            </div>
+          </CommandOutput>
+        );
+
+        const Projects = () => {
+          const githubUrl = "https://github.com/Thizizmanojkumar-27";
+          return (
+            <CommandOutput>
+              <div className={`text-xl font-bold text-term-heading mb-2`}>Featured Work</div>
+              <div className="space-y-4">
+                <div>
+                  <span className="text-term-accent font-semibold">Edu Pulse - Student Feedback System</span>
+                  <p>A comprehensive system for student feedback collection and analysis.</p>
+                  <p className={`text-sm text-term-subtle`}>Tech: HTML, CSS, Vanilla JS (Frontend); Spring Boot, MySQL, JWT Security (Backend).</p>
+                </div>
+                <div>
+                  <span className="text-term-accent font-semibold">E-commerce Application (Full-Featured)</span>
+                  <p>A full-featured e-commerce platform with a user-friendly interface and comprehensive backend logic.</p>
+                </div>
+                <div>
+                  <span className="text-term-accent font-semibold">Todo App (Simple yet Powerful)</span>
+                  <p>A simple yet powerful application to manage daily tasks, demonstrating proficiency in state management.</p>
+                </div>
+                <div>
+                  <span className="text-term-accent font-semibold">REST API (Backend Service)</span>
+                  <p>A robust backend service for efficient data management and handling various client requests.</p>
+                </div>
+                <div>
+                  <span className="text-term-accent font-semibold">Fullstack Application (Complete Solution)</span>
+                  <p>A complete application covering both front-end (React/JS) and back-end (Node.js/Spring Boot) development cycles.</p>
+                </div>
+                <p className={`pt-4 text-term-subtle`}>
+                  GitHub: <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="hover:underline text-term-accent font-bold">View all these projects</a>
+                </p>
+              </div>
+            </CommandOutput>
+          );
+        };
+
+        const Contact = () => {
+          const email = "manojkumar.twenty7@gmail.com";
+          const phone = "+91 9380127110";
+          const linkedInUrl = "https://www.linkedin.com/in/manoj-kumar-087447324?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app";
+          const githubUrl = "https://github.com/Thizizmanojkumar-27";
+          const [copyStatus, setCopyStatus] = useState(null); 
+          
+          const copyToClipboard = (text, type) => {
+            try {
+              const el = document.createElement('textarea');
+              el.value = text;
+              document.body.appendChild(el);
+              el.select();
+              document.execCommand('copy');
+              document.body.removeChild(el);
+              setCopyStatus(<span className="text-green-600 font-bold ml-2">Copied {type}!</span>);
+              setTimeout(() => setCopyStatus(null), 3000);
+            } catch (err) {
+              setCopyStatus(<span className="text-red-500 ml-2">Failed to copy {type}.</span>);
+              setTimeout(() => setCopyStatus(null), 3000);
+            }
+          };
+
+          return (
+            <CommandOutput>
+              <div className={`text-xl font-bold text-term-heading mb-2`}>Get in Touch</div>
+              <p>I am always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-5 h-5 text-term-heading" />
+                  <p>Email: <span className="text-term-accent">{email}</span></p>
+                  <button 
+                    onClick={() => copyToClipboard(email, 'Email')}
+                    className={`text-gray-400 hover:text-term-heading transition-colors ml-2 p-1 rounded bg-white/5`}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Phone className="w-5 h-5 text-term-heading" />
+                  <p>Phone: <span className="text-term-accent">{phone}</span></p>
+                  <button 
+                    onClick={() => copyToClipboard(phone, 'Phone')}
+                    className={`text-gray-400 hover:text-term-heading transition-colors ml-2 p-1 rounded bg-white/5`}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Linkedin className="w-5 h-5 text-term-accent" />
+                  <p>LinkedIn: <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className={`text-term-accent hover:underline`}>Manoj Kumar Profile</a></p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Github className="w-5 h-5 text-term-accent" />
+                  <p>GitHub: <a href={githubUrl} target="_blank" rel="noopener noreferrer" className={`text-term-accent hover:underline`}>Thizizmanojkumar-27</a></p>
+                </div>
+              </div>
+              {copyStatus && <div className="mt-2">{copyStatus}</div>}
+            </CommandOutput>
+          );
+        };
+
+        const Readme = () => (
+          <CommandOutput>
+            <div className={`text-xl font-bold text-term-heading mb-2`}>Available Commands:</div>
+            <div className="grid grid-cols-[100px_1fr] gap-x-4">
+              <p className="text-term-accent font-bold">readme</p> <p>- Display this list of commands.</p>
+              <p className="text-term-accent font-bold">clear</p> <p>- Clear the terminal screen.</p>
+              <p className="text-term-accent font-bold">about</p> <p>- View my professional summary.</p>
+              <p className="text-term-accent font-bold">skills</p> <p>- List my technical proficiencies.</p>
+              <p className="text-term-accent font-bold">experience</p> <p>- View my internship and work history.</p>
+              <p className="text-term-accent font-bold">projects</p> <p>- Showcase my featured work.</p>
+              <p className="text-term-accent font-bold">contact</p> <p>- Find ways to connect with me.</p>
+              <p className="text-term-accent font-bold">theme</p> <p>- Change theme ('theme white', 'theme black', 'theme dracula').</p>
+              <p className="text-term-accent font-bold">ls -l</p> <p>- View mock directory contents.</p>
+            </div>
+          </CommandOutput>
+        );
+
+        const NotFound = ({ command }) => (
+          <CommandOutput>
+            <p className="text-red-500">Error: command not found: <span className="text-term-main">{command}</span></p>
+            <p>Type '<span className="text-term-accent">readme</span>' for a list of commands.</p>
+          </CommandOutput>
+        );
+
+        const MockLs = () => (
+          <CommandOutput>
+            <p className={`text-lg font-bold text-term-heading mb-2`}>Portfolio Root Directory:</p>
+            <div className="grid grid-cols-[100px_1fr] gap-x-4">
+              <p className="text-term-subtle">drwxr-xr-x</p> <p className="text-term-accent">about/</p>
+              <p className="text-term-subtle">drwxr-xr-x</p> <p className="text-term-accent">skills/</p>
+              <p className="text-term-subtle">drwxr-xr-x</p> <p className="text-term-accent">experience/</p>
+              <p className="text-term-subtle">drwxr-xr-x</p> <p className="text-term-accent">projects/</p>
+              <p className="text-term-subtle">-rw-r--r--</p> <p className="text-term-accent">README.txt</p>
+              <p className="text-term-subtle">-rw-r--r--</p> <p className="text-term-accent">contact.info</p>
+            </div>
+          </CommandOutput>
+        )
+
+        // --- Main Terminal Component ---
+
+        const App = () => {
+          const [history, setHistory] = useState([{ output: <Welcome /> }]);
+          const [input, setInput] = useState('');
+          const [historyIndex, setHistoryIndex] = useState(-1);
+          const [theme, setTheme] = useState('dark');
+          const inputRef = useRef(null);
+          const terminalRef = useRef(null);
+
+          useEffect(() => {
+            document.body.setAttribute('data-theme', theme);
+          }, [theme]);
+
+          const commandMap = {
+            'readme': <Readme />,
+            'about': <About />,
+            'skills': <Skills />,
+            'experience': <Experience />,
+            'projects': <Projects />,
+            'contact': <Contact />, 
+            'ls -l': <MockLs />,
+          };
+
+          useEffect(() => {
+            inputRef.current?.focus();
+          }, [history]);
+
+          useEffect(() => {
+            terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+          }, [history]);
+
+          const executeCommand = useCallback((command) => {
+            const fullInput = command.trim().toLowerCase();
+            const [baseCmd, arg] = fullInput.split(' ');
+
+            const commandEntry = { 
+              command: command, 
+              prompt: <span className="text-term-prompt font-bold">Enter Command:$</span>, 
+            };
+            
+            if (baseCmd === 'clear' || baseCmd === 'cls') {
+              setHistory([{ output: <Welcome /> }]);
+              return;
+            }
+
+            if (baseCmd === 'theme') {
+                if (arg === 'white' || arg === 'light') {
+                    setTheme('light');
+                    setHistory(prev => [...prev, commandEntry, { output: <CommandOutput>Theme set to <span className="text-term-accent font-bold">White Glossy</span>.</CommandOutput> }]);
+                } else if (arg === 'black' || arg === 'dark') {
+                    setTheme('dark');
+                    setHistory(prev => [...prev, commandEntry, { output: <CommandOutput>Theme set to <span className="text-term-accent font-bold">Black Glossy</span>.</CommandOutput> }]);
+                } else if (arg === 'dracula') {
+                    setTheme('dracula');
+                    setHistory(prev => [...prev, commandEntry, { output: <CommandOutput>Theme set to <span className="text-term-accent font-bold">Dracula</span>.</CommandOutput> }]);
+                } else {
+                    const themes = ['dark', 'light', 'dracula'];
+                    const nextIndex = (themes.indexOf(theme) + 1) % themes.length;
+                    const nextTheme = themes[nextIndex];
+                    const themeNames = { dark: 'Black Glossy', light: 'White Glossy', dracula: 'Dracula' };
+                    setTheme(nextTheme);
+                    setHistory(prev => [...prev, commandEntry, { output: <CommandOutput>Theme toggled to <span className="text-term-accent font-bold">{themeNames[nextTheme]}</span>.</CommandOutput> }]);
+                }
+                return;
+            }
+            
+            let outputComponent;
+            const commandResult = commandMap[fullInput];
+
+            if (commandResult) {
+              outputComponent = commandResult;
+            } else {
+              outputComponent = <NotFound command={command} />;
+            }
+
+            setHistory(prev => [
+              ...prev, 
+              commandEntry,
+              { output: outputComponent }
+            ]);
+            
+          }, [theme]);
+
+          const handleCommandSubmit = (e) => {
+            e.preventDefault();
+            if (!input.trim()) {
+              setHistory(prev => [...prev, { prompt: <span className="text-term-prompt font-bold">Enter Command:$</span> }]); 
+              setInput('');
+              setHistoryIndex(-1);
+              return;
+            }
+            executeCommand(input);
+            setInput('');
+            setHistoryIndex(-1);
+          };
+
+          const handleKeyDown = (e) => {
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              const commands = history.filter(h => h.command);
+              if (commands.length > 0) {
+                const newIndex = Math.min(historyIndex + 1, commands.length - 1);
+                setHistoryIndex(newIndex);
+                setInput(commands[commands.length - 1 - newIndex].command);
+              }
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              const commands = history.filter(h => h.command);
+              if (historyIndex > 0) {
+                const newIndex = historyIndex - 1;
+                setHistoryIndex(newIndex);
+                setInput(commands[commands.length - 1 - newIndex].command);
+              } else {
+                setHistoryIndex(-1);
+                setInput('');
+              }
+            }
+          };
+
+          const terminalStyle = useMemo(() => ({
+            background: 'var(--term-bg)',
+            boxShadow: 'var(--term-shadow)',
+          }), [theme]);
+
+          return (
+            <div className="min-h-screen flex items-center justify-center p-4 antialiased transition-colors duration-300">
+              <div 
+                ref={terminalRef}
+                className={`w-full max-w-4xl h-[80vh] text-term-main shadow-2xl rounded-lg overflow-y-auto 
+                           p-4 sm:p-6 border border-gray-700/30 terminal-style`}
+                onClick={() => inputRef.current?.focus()}
+              >
+                <div 
+                  className="flex justify-between items-center mb-4 sticky top-0 z-10 p-2 -mt-2 -mx-2 transition-colors"
+                  style={{ background: 'var(--term-header-bg)' }}
+                >
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  </div>
+                  <span className={`text-sm text-term-subtle font-semibold`}>PORTFOLIO</span>
+                  <div className="w-10"></div>
+                </div>
+                
+                {history.map((entry, index) => (
+                  <div key={index} className="break-words">
+                    {entry.command && (
+                      <p className="flex items-center">
+                        {entry.prompt}
+                        <span className="ml-2 text-term-input-text font-bold">{entry.command}</span>
+                      </p>
+                    )}
+                    {entry.output && entry.output}
+                  </div>
+                ))}
+
+                <form onSubmit={handleCommandSubmit} className="flex items-center mt-2">
+                  <label htmlFor="terminal-input" className="text-term-prompt font-bold shrink-0">
+                    Enter Command:$
+                  </label>
+                  <input
+                    id="terminal-input"
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="flex-grow bg-transparent border-none outline-none ml-2 p-0 text-sm font-mono tracking-wider focus:ring-0 terminal-input-field font-bold"
+                    autoFocus
+                    autoComplete="off"
+                    spellCheck="false"
+                  />
+                </form>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
