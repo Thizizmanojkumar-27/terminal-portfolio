@@ -4,7 +4,7 @@ An interactive **CLI-inspired personal portfolio** built using **HTML, Tailwind 
 This portfolio mimics a terminal experience where users can type commands to explore my profile, skills, projects, and contact details.
 
 🌐 **Live Demo**  
-👉 https://thizismanojkumar-27.github.io/terminal-portfolio/
+👉 https://thizizmanojkumar-27.github.io/terminal-portfolio/
 
 ---
 
